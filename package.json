@@ -1,0 +1,20 @@
+{
+  "name": "novel-narrator",
+  "version": "1.0.0",
+  "description": "Browser extension that reads web novels and PDFs aloud and exports chapters as MP3 audiobooks.",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "esbuild": "^0.28.2",
+    "kokoro-js": "^1.2.1",
+    "pdfjs-dist": "^6.3.289"
+  },
+  "private": true,
+  "type": "module"
+}

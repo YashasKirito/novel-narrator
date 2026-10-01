@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF · Novel Narrator</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f1e8; --paper: #fffdf8; --ink: #23201c; --muted: #6f675c; --line: #e4dccf;
+    --accent: #b4442c; --accent-ink: #fff; --chip: #efe8dc; --chip-ink: #3a342c; --shadow: 0 6px 24px rgba(60,40,10,.08);
+  }
+  :root[data-theme="dark"] {
+    --bg: #131316; --paper: #1b1b1f; --ink: #e6e2da; --muted: #9a958c; --line: #2e2e36;
+    --accent: #c8433c; --accent-ink: #fff; --chip: #26262d; --chip-ink: #d7d3ca; --shadow: 0 8px 28px rgba(0,0,0,.5);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131316; --paper: #1b1b1f; --ink: #e6e2da; --muted: #9a958c; --line: #2e2e36;
+      --accent: #c8433c; --accent-ink: #fff; --chip: #26262d; --chip-ink: #d7d3ca; --shadow: 0 8px 28px rgba(0,0,0,.5);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh; }
+  a { color: var(--accent); }
+  button, select { font: inherit; }
+  .btn { background: var(--chip); color: var(--chip-ink); border: 1px solid var(--line); border-radius: 9px; padding: 6px 11px; cursor: pointer; }
+  .btn:hover { filter: brightness(1.06); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  select.btn { padding-right: 8px; max-width: 46vw; }
+
+  header.top {
+    position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 16px;
+  }
+  header.top .book { font-weight: 600; flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  header.top .meta { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  header.top .spacer { flex: 1 1 0; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 140px; }
+  article.reader { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+    padding: clamp(20px, 5vw, 56px); font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: clamp(16px, 1.05rem + .2vw, 19px); line-height: 1.75; }
+  article.reader h1 { font-size: 1.55em; line-height: 1.25; margin: 0 0 .4em; letter-spacing: -.01em; }
+  article.reader .pages { color: var(--muted); font: 13px system-ui, sans-serif; margin: 0 0 2em; }
+  article.reader h2, article.reader h3 { font-size: 1.15em; margin: 1.6em 0 .6em; }
+  article.reader p { margin: 0 0 1em; text-wrap: pretty; }
+  article.reader p:not(:first-of-type) { text-indent: 1.4em; }
+
+  nav.chap { display: flex; justify-content: space-between; gap: 12px; margin: 28px 0 0; }
+  nav.chap a { text-decoration: none; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); }
+  nav.chap a:hover { border-color: var(--accent); }
+  nav.chap a[hidden] { display: none; }
+
+  .state { max-width: 560px; margin: 12vh auto 0; padding: 28px; text-align: center; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+  .state h2 { margin: 0 0 8px; font-size: 20px; }
+  .state p { color: var(--muted); margin: 6px 0; }
+  .state .err { color: var(--accent); white-space: pre-wrap; word-break: break-word; }
+  .state .bar { height: 4px; background: var(--chip); border-radius: 4px; overflow: hidden; margin: 18px 0 6px; }
+  .state .bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  .drop { margin-top: 18px; padding: 26px; border: 2px dashed var(--line); border-radius: 14px; color: var(--muted); }
+  .drop.over { border-color: var(--accent); color: var(--ink); }
+  .drop input { display: none; }
+  body.dragging .drop { border-color: var(--accent); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="book" data-book>PDF Narrator</div>
+  <select class="btn" data-chapters hidden></select>
+  <span class="meta" data-meta></span>
+  <span class="spacer"></span>
+  <a class="btn" data-src target="_blank" rel="noopener" hidden>Original</a>
+  <button class="btn" data-a="reload" title="Re-read the PDF from its source" hidden>↻</button>
+  <button class="btn" data-a="open" title="Open another PDF">Open…</button>
+  <button class="btn" data-a="theme" title="Toggle light / dark">◐</button>
+</header>
+
+<section class="state" data-state>
+  <h2 data-state-title>Opening PDF…</h2>
+  <p data-state-text></p>
+  <p class="err" data-state-err hidden></p>
+  <div class="bar" data-state-bar><i></i></div>
+  <label class="drop" data-drop hidden>
+    <input type="file" accept="application/pdf,.pdf" data-file>
+    <b>Choose a PDF</b> or drop one here<br><small>It's read entirely on this computer, nothing is uploaded.</small>
+  </label>
+</section>
+
+<main hidden data-main>
+  <article class="reader" data-csn-pdf data-article></article>
+  <nav class="chap"><a rel="prev" data-prev hidden>← Previous</a><a rel="next" data-next hidden>Next →</a></nav>
+</main>
+
+<script type="module" src="reader.js"></script>
+</body>
+</html>

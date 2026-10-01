@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Novel Narrator: Read Aloud & Audiobook Maker",
+  "short_name": "Novel Narrator",
+  "description": "Read web novels and PDFs aloud with natural AI voices and save chapters as MP3 audiobooks. Runs entirely in your browser.",
+  "version": "0.8.0",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "offscreen",
+    "storage",
+    "downloads",
+    "scripting",
+    "activeTab"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "file:///*"
+  ],
+  "host_permissions": [
+    "https://crimsonscrolls.net/*",
+    "https://huggingface.co/*",
+    "https://*.huggingface.co/*",
+    "https://*.hf.co/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://crimsonscrolls.net/novel/*/*",
+        "https://brightnovels.com/*",
+        "https://global.novelpia.com/*",
+        "https://novellive.app/book/*/*",
+        "https://wtr-lab.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "action": {
+    "default_title": "Novel Narrator: click to enable/disable on this site, or to read a PDF"
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  },
+  "cross_origin_embedder_policy": {
+    "value": "credentialless"
+  },
+  "cross_origin_opener_policy": {
+    "value": "same-origin"
+  }
+}
